@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Reports\Adapters;
+namespace App\Common\Adapters;
 
 interface FileSystemInterface
 {

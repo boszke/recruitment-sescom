@@ -1,10 +1,10 @@
 <?php
 
-namespace Tests\Reports\Readers;
+namespace Tests\Common\Readers;
 
-use App\Reports\Adapters\FileSystemInterface;
-use App\Reports\Exceptions\FileException;
-use App\Reports\Readers\FileReader;
+use App\Common\Adapters\FileSystemInterface;
+use App\Common\Exceptions\FileException;
+use App\Common\Readers\FileReader;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 

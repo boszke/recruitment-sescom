@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Reports\UI\CLI\Commands;
 
-use App\Reports\Adapters\FileSystemAdapter;
-use App\Reports\Exceptions\FileException;
-use App\Reports\Readers\FileReader;
+use App\Common\Adapters\FileSystemAdapter;
+use App\Common\Exceptions\FileException;
+use App\Common\Readers\FileReader;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;

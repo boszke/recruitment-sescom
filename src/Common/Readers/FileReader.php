@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Reports\Readers;
+namespace App\Common\Readers;
 
-use App\Reports\Adapters\FileSystemInterface;
-use App\Reports\Exceptions\FileException;
+use App\Common\Adapters\FileSystemInterface;
+use App\Common\Exceptions\FileException;
 
 class FileReader implements ReaderInterface
 {

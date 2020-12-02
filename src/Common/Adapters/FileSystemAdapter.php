@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Reports\Adapters;
+namespace App\Common\Adapters;
 
 use RuntimeException;
 use Symfony\Component\Filesystem\Filesystem;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Reports\Exceptions;
+namespace App\Common\Exceptions;
 
 use Exception;
 

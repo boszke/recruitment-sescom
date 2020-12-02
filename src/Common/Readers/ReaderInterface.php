@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Reports\Readers;
+namespace App\Common\Readers;
 
-use App\Reports\Exceptions\FileException;
+use App\Common\Exceptions\FileException;
 
 interface ReaderInterface
 {
