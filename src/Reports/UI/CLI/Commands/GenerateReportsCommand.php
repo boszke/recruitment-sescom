@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Reports\UI\CLI\Commands;
 
 use App\Common\Adapters\FileSystemAdapter;
+use App\Common\Exceptions\DecoderException;
 use App\Common\Exceptions\FileException;
 use App\Common\Readers\FileReader;
+use App\Common\Services\FileReaderDecoderService;
+use App\Common\ValueObjects\JsonFile;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -32,15 +35,15 @@ class GenerateReportsCommand extends Command
     {
         $sourcePath = $input->getArgument(self::SOURCE_PATH_ARGUMENT_NAME);
 
-        $fileReader = new FileReader($sourcePath, new FileSystemAdapter());
+        $file = new JsonFile($sourcePath);
+        $fileReader = new FileReader($file, new FileSystemAdapter());
+        $fileDecoderService = new FileReaderDecoderService($file, $fileReader);
         try {
-            $fileContent = $fileReader->read();
-        } catch (FileException $e) {
+            $data = $fileDecoderService->run();
+        } catch (FileException | DecoderException $e) {
             echo 'error' . $e->getMessage();
             exit();
         }
-
-        echo $fileContent;
 
         return Command::SUCCESS;
     }

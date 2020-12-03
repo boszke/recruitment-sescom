@@ -6,29 +6,30 @@ namespace App\Common\Readers;
 
 use App\Common\Adapters\FileSystemInterface;
 use App\Common\Exceptions\FileException;
+use app\Common\ValueObjects\AbstractFile;
 
 class FileReader implements ReaderInterface
 {
-    private string $filePath;
+    private AbstractFile $file;
 
     private FileSystemInterface $filesystem;
 
-    public function __construct(string $filePath, FileSystemInterface $filesystem)
+    public function __construct(AbstractFile $file, FileSystemInterface $filesystem)
     {
-        $this->filePath = $filePath;
+        $this->file = $file;
         $this->filesystem = $filesystem;
     }
 
     public function read(): string
     {
-        if (!$this->filesystem->fileExists($this->filePath)) {
-            throw new FileException(sprintf('File not found: %s', $this->filePath));
+        if (!$this->filesystem->fileExists($this->file->getFilePath())) {
+            throw new FileException(sprintf('File not found: %s', $this->file->getFilePath()));
         }
 
-        $fileContent = $this->filesystem->getFileContent($this->filePath);
+        $fileContent = $this->filesystem->getFileContent($this->file->getFilePath());
 
         if (false === $fileContent) {
-            throw new FileException(sprintf('File reading error: %s', $this->filePath));
+            throw new FileException(sprintf('File reading error: %s', $this->file->getFilePath()));
         }
 
         return $fileContent;

@@ -14,11 +14,20 @@ class FileSystemAdapter extends Filesystem implements FileSystemInterface
         return $this->exists($fileName);
     }
 
+    /**
+     * @param string $fileName
+     * @return false|string
+     */
     public function getFileContent(string $fileName)
     {
         return file_get_contents($fileName);
     }
 
+    /**
+     * @param string $fileName
+     * @param string $content
+     * @return false|int
+     */
     public function saveFileContent(string $fileName, string $content)
     {
         return file_put_contents($fileName, $content);

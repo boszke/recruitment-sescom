@@ -5,11 +5,17 @@ namespace Tests\Common\Readers;
 use App\Common\Adapters\FileSystemInterface;
 use App\Common\Exceptions\FileException;
 use App\Common\Readers\FileReader;
+use App\Common\ValueObjects\AbstractFile;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class FileReaderTest extends TestCase
 {
+    /**
+     * @var MockObject|AbstractFile
+     */
+    private MockObject $file;
+
     /**
      * @var MockObject|FileSystemInterface
      */
@@ -19,6 +25,11 @@ class FileReaderTest extends TestCase
     {
         parent::setUp();
 
+        $this->file = $this->getMockBuilder(AbstractFile::class)->disableOriginalConstructor()->getMock();
+        $this->file
+            ->expects($this->any())
+            ->method('getFilePath')
+            ->willReturn('file');
         $this->fileSystemAdapter = $this->getMockBuilder(FileSystemInterface::class)->getMock();
     }
 
@@ -35,7 +46,7 @@ class FileReaderTest extends TestCase
 
         $this->expectException(FileException::class);
 
-        (new FileReader('path', $this->fileSystemAdapter))->read();
+        (new FileReader($this->file, $this->fileSystemAdapter))->read();
     }
 
     public function testErrorOnGetFileContentFailure(): void
@@ -52,7 +63,7 @@ class FileReaderTest extends TestCase
 
         $this->expectException(FileException::class);
 
-        (new FileReader('path', $this->fileSystemAdapter))->read();
+        (new FileReader($this->file, $this->fileSystemAdapter))->read();
     }
 
     public function testReturnContent(): void
@@ -67,7 +78,7 @@ class FileReaderTest extends TestCase
             ->method('getFileContent')
             ->willReturn('Lorem ipsum');
 
-        $fileContent = (new FileReader('path', $this->fileSystemAdapter))->read();
+        $fileContent = (new FileReader($this->file, $this->fileSystemAdapter))->read();
 
         $this->assertEquals($fileContent, 'Lorem ipsum');
     }
