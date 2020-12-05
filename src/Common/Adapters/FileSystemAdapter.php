@@ -43,4 +43,9 @@ class FileSystemAdapter extends Filesystem implements FileSystemInterface
 
         return true;
     }
+
+    public function getDirectoryPathFromFilePath(string $fileName): string
+    {
+        return pathinfo($fileName, PATHINFO_DIRNAME);
+    }
 }

@@ -6,10 +6,13 @@ namespace App\Reports\UI\CLI\Commands;
 
 use App\Common\Adapters\FileSystemAdapter;
 use App\Common\Exceptions\DecoderException;
+use App\Common\Exceptions\EncoderException;
 use App\Common\Exceptions\FileException;
 use App\Common\Readers\FileReader;
 use App\Common\Services\FileReaderDecoderService;
+use App\Common\Services\FileWriterEncoderService;
 use App\Common\ValueObjects\JsonFile;
+use App\Common\Writers\FileWriter;
 use App\Reports\Dictionaries\AbstractInformationTypesDictionary;
 use App\Reports\DTO\InformationCollection;
 use App\Reports\Mappers\InformationMapper;
@@ -52,30 +55,28 @@ class GenerateReportsCommand extends Command
         $collectionService = new InformationService($fileDecoderService, $mapper, $collection, $resolver);
         try {
             $collection = $collectionService->buildTypeCollection();
-            $collectionReview = $collection->filterByType(AbstractInformationTypesDictionary::INFORMATION_TYPE_REVIEW);
-            $collectionAccident = $collection->filterByType(AbstractInformationTypesDictionary::INFORMATION_TYPE_ACCIDENT);
-            $collectionUnprocessed = $collection->filterByType(AbstractInformationTypesDictionary::INFORMATION_TYPE_UNPROCESSED);
-
+//            $collectionReview = $collection->filterByType(AbstractInformationTypesDictionary::INFORMATION_TYPE_REVIEW);
+//            $collectionAccident = $collection->filterByType(AbstractInformationTypesDictionary::INFORMATION_TYPE_ACCIDENT);
+//            $collectionUnprocessed = $collection->filterByType(AbstractInformationTypesDictionary::INFORMATION_TYPE_UNPROCESSED);
 
             //TODO do zmiany na logowanie
-            echo 'Przetworzone wiadomości: ';
-            echo count($collection->getCollection());
-            echo PHP_EOL;
+//            echo 'Przetworzone wiadomości: ';
+//            echo count($collection->getCollection());
+//            echo PHP_EOL;
+//
+//            echo 'Liczba utworzonych przeglądów: ';
+//            echo count($collectionReview);
+//            echo PHP_EOL;
+//
+//            echo 'Liczba utworzonych awarii: ';
+//            echo count($collectionAccident);
+//            echo PHP_EOL;
+//
+//            foreach ($collectionUnprocessed as $unprocessed) {
+//                echo sprintf('Nie przetworzono zadania: %d. Powód: %s', $unprocessed->getNumber(), $unprocessed->getReason());
+//                echo PHP_EOL;
+//            }
 
-            echo 'Liczba utworzonych przeglądów: ';
-            echo count($collectionReview);
-            echo PHP_EOL;
-
-            echo 'Liczba utworzonych awarii: ';
-            echo count($collectionAccident);
-            echo PHP_EOL;
-
-            foreach ($collectionUnprocessed as $unprocessed) {
-                echo sprintf('Nie przetworzono zadania: %d. Powód: %s', $unprocessed->getNumber(), $unprocessed->getReason());
-                echo PHP_EOL;
-            }
-
-            //TODO zapis do plików json
             //TODO logowanie istotnych momentów
 
         } catch (FileException | DecoderException | Exception $e) {
@@ -84,7 +85,32 @@ class GenerateReportsCommand extends Command
             return Command::FAILURE;
         }
 
+        try {
+            $this->saveCollectionToFile('./resources/unprocessed.json', $collection, AbstractInformationTypesDictionary::INFORMATION_TYPE_UNPROCESSED);
+            $this->saveCollectionToFile('./resources/review.json', $collection, AbstractInformationTypesDictionary::INFORMATION_TYPE_REVIEW);
+            $this->saveCollectionToFile('./resources/accident.json', $collection, AbstractInformationTypesDictionary::INFORMATION_TYPE_ACCIDENT);
+        } catch (EncoderException | FileException $e) {
+            echo 'error: ' . $e->getMessage();
+
+            return Command::FAILURE;
+        }
+
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * @param string $filePath
+     * @param InformationCollection $informationCollection
+     * @param string $collectionType
+     * @throws EncoderException
+     * @throws FileException
+     */
+    private function saveCollectionToFile(string $filePath, InformationCollection $informationCollection, string $collectionType): void
+    {
+        $file = new JsonFile($filePath);
+        $writer = new FileWriter($file, new FileSystemAdapter());
+        $filteredCollection = $informationCollection->createInstanceByType($collectionType);
+        (new FileWriterEncoderService($file, $writer))->run($filteredCollection->toArray());
     }
 }

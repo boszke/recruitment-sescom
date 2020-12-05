@@ -19,7 +19,15 @@ class InformationCollection
         return $this;
     }
 
-    public function filterByType(string $type): array
+    public function createInstanceByType(string $type): self
+    {
+        $collection = new self();
+        $collection->collection = $this->filterByType($type);
+
+        return $collection;
+    }
+
+    private function filterByType(string $type): array
     {
         return array_filter($this->collection, function (AbstractTypeInformation $information) use ($type): bool {
             return $information->getType() === $type;

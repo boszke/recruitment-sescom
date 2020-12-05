@@ -22,4 +22,6 @@ interface FileSystemInterface
     public function saveFileContent(string $fileName, string $content);
 
     public function createDirectory(string $pathName): bool;
+
+    public function getDirectoryPathFromFilePath(string $fileName): string;
 }
