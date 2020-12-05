@@ -6,7 +6,7 @@ namespace App\Common\Readers;
 
 use App\Common\Adapters\FileSystemInterface;
 use App\Common\Exceptions\FileException;
-use app\Common\ValueObjects\AbstractFile;
+use App\Common\ValueObjects\AbstractFile;
 
 class FileReader implements ReaderInterface
 {

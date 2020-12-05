@@ -36,12 +36,12 @@ class ReviewInformation extends AbstractTypeInformation
 
     protected function getDateString(): ?string
     {
-        return $this->dateAttribute->getDateTime() ? $this->dateAttribute->getDateTime()->format('Y-m-d') : null;
+        return $this->dateAttribute->getDateTime() !== null ? $this->dateAttribute->getDateTime()->format('Y-m-d') : null;
     }
 
     protected function getWeek(): ?int
     {
-        return $this->dateAttribute->getDateTime() ? (int)$this->dateAttribute->getDateTime()->format('W') : null;
+        return $this->dateAttribute->getDateTime() !== null ? (int)$this->dateAttribute->getDateTime()->format('W') : null;
     }
 
     protected function getStatus(): string

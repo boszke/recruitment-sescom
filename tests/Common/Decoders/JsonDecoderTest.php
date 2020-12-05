@@ -51,7 +51,7 @@ class JsonDecoderTest extends TestCase
      * @param array $expected
      * @throws \App\Common\Exceptions\DecoderException
      */
-    public function testDecodeSuccess(string $json, array $expected)
+    public function testDecodeSuccess(string $json, array $expected): void
     {
         $decoder = new JsonDecoder();
         $data = $decoder->decode($json);

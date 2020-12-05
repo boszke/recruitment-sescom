@@ -18,7 +18,7 @@ class DescriptionAttribute
         return $this->description;
     }
 
-    protected function setDescription($description): void
+    protected function setDescription(string $description): void
     {
         $this->description = trim($description);
     }

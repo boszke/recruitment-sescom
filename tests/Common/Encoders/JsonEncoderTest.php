@@ -40,7 +40,7 @@ class JsonEncoderTest extends TestCase
      * @param string $expected
      * @throws \App\Common\Exceptions\EncoderException
      */
-    public function testDecodeSuccess(array $json, string $expected)
+    public function testDecodeSuccess(array $json, string $expected): void
     {
         $encoder = new JsonEncoder();
         $data = $encoder->encode($json);

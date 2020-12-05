@@ -49,7 +49,7 @@ class AccidentInformation extends AbstractTypeInformation
 
     protected function getDateString(): ?string
     {
-        return $this->dateAttribute->getDateTime() ? $this->dateAttribute->getDateTime()->format('Y-m-d') : null;
+        return $this->dateAttribute->getDateTime() !== null ? $this->dateAttribute->getDateTime()->format('Y-m-d') : null;
     }
 
     protected function getStatus(): string

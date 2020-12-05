@@ -49,6 +49,11 @@ class GenerateReportsCommand extends Command
         $logger->info(sprintf("Command %s started", self::$defaultName));
 
         $sourcePath = $input->getArgument(self::SOURCE_PATH_ARGUMENT_NAME);
+        if (!is_string($sourcePath)) {
+            $logger->error('File path must be string');
+
+            return Command::FAILURE;
+        }
 
         $file = new JsonFile($sourcePath);
         $fileReader = new FileReader($file, new FileSystemAdapter());
@@ -88,8 +93,8 @@ class GenerateReportsCommand extends Command
                 sprintf('Created unprocessed: %d', $collectionUnprocessed->count()),
             ]
         );
-        foreach ($collectionUnprocessed as $unprocessed) {
-            $output->writeln(sprintf('Unprocessed: %d. Reason: %s', $unprocessed->getNumber(), $unprocessed->getReason()));
+        foreach ($collectionUnprocessed->toArray() as $unprocessed) {
+            $output->writeln(sprintf('Unprocessed: %d. Reason: %s', $unprocessed['number'], $unprocessed['reason']));
         }
 
         return Command::SUCCESS;

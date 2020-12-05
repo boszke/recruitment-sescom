@@ -9,8 +9,8 @@ use App\Common\Exceptions\FileException;
 interface WriterInterface
 {
     /**
-     * @param $data
-     * @return mixed
+     * @param mixed $data
+     * @return void
      * @throws FileException
      */
     public function write($data): void;

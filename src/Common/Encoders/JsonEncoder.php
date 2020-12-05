@@ -15,7 +15,7 @@ class JsonEncoder implements EncoderInterface
     {
         $encodedData = json_encode($content, JSON_UNESCAPED_UNICODE);
 
-        if ($encodedData === null || json_last_error() !== JSON_ERROR_NONE) {
+        if ($encodedData === false || json_last_error() !== JSON_ERROR_NONE) {
             throw new EncoderException('Error encoding data.');
         }
 

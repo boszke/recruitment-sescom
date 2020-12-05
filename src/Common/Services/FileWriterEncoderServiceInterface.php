@@ -11,7 +11,7 @@ interface FileWriterEncoderServiceInterface
 {
     /**
      * @param array $data
-     * @return mixed
+     * @return void
      * @throws EncoderException
      * @throws FileException
      */
