@@ -6,10 +6,11 @@ namespace App\Common\Services;
 
 use App\Common\Decoders\DecoderFactoryInterface;
 use App\Common\Exceptions\DecoderException;
+use App\Common\Exceptions\FileException;
 use App\Common\Readers\ReaderInterface;
 use Generator;
 
-class FileReaderDecoderService
+class FileReaderDecoderService implements FileReaderDecoderServiceInterface
 {
     /**
      * @var DecoderFactoryInterface
@@ -30,7 +31,7 @@ class FileReaderDecoderService
     /**
      * @return Generator
      * @throws DecoderException
-     * @throws \App\Common\Exceptions\FileException
+     * @throws FileException
      */
     public function run(): Generator
     {

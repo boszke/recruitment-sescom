@@ -10,6 +10,13 @@ use App\Common\Exceptions\FileException;
 use App\Common\Readers\FileReader;
 use App\Common\Services\FileReaderDecoderService;
 use App\Common\ValueObjects\JsonFile;
+use App\Reports\Dictionaries\AbstractInformationTypesDictionary;
+use App\Reports\DTO\InformationCollection;
+use App\Reports\Mappers\InformationMapper;
+use App\Reports\Resolvers\InformationTypeResolver;
+use App\Reports\Resolvers\UniqueDescriptionInformationTypeResolverDecorator;
+use App\Reports\Services\InformationService;
+use Exception;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -38,12 +45,45 @@ class GenerateReportsCommand extends Command
         $file = new JsonFile($sourcePath);
         $fileReader = new FileReader($file, new FileSystemAdapter());
         $fileDecoderService = new FileReaderDecoderService($file, $fileReader);
+
+        $collection = new InformationCollection();
+        $mapper = new InformationMapper();
+        $resolver = new UniqueDescriptionInformationTypeResolverDecorator(new InformationTypeResolver(), $collection);
+        $collectionService = new InformationService($fileDecoderService, $mapper, $collection, $resolver);
         try {
-            $data = $fileDecoderService->run();
-        } catch (FileException | DecoderException $e) {
-            echo 'error' . $e->getMessage();
-            exit();
+            $collection = $collectionService->buildTypeCollection();
+            $collectionReview = $collection->filterByType(AbstractInformationTypesDictionary::INFORMATION_TYPE_REVIEW);
+            $collectionAccident = $collection->filterByType(AbstractInformationTypesDictionary::INFORMATION_TYPE_ACCIDENT);
+            $collectionUnprocessed = $collection->filterByType(AbstractInformationTypesDictionary::INFORMATION_TYPE_UNPROCESSED);
+
+
+            //TODO do zmiany na logowanie
+            echo 'Przetworzone wiadomości: ';
+            echo count($collection->getCollection());
+            echo PHP_EOL;
+
+            echo 'Liczba utworzonych przeglądów: ';
+            echo count($collectionReview);
+            echo PHP_EOL;
+
+            echo 'Liczba utworzonych awarii: ';
+            echo count($collectionAccident);
+            echo PHP_EOL;
+
+            foreach ($collectionUnprocessed as $unprocessed) {
+                echo sprintf('Nie przetworzono zadania: %d. Powód: %s', $unprocessed->getNumber(), $unprocessed->getReason());
+                echo PHP_EOL;
+            }
+
+            //TODO zapis do plików json
+            //TODO logowanie istotnych momentów
+
+        } catch (FileException | DecoderException | Exception $e) {
+            echo 'error: ' . $e->getMessage();
+
+            return Command::FAILURE;
         }
+
 
         return Command::SUCCESS;
     }
