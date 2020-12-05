@@ -14,3 +14,8 @@ Testy jednostkowe:
 ```bash
 vendor/bin/phpunit
 ```
+
+Wyświetlenie logów:
+1. Podsumowanie jest wyświetlane zawsze
+2. Parametr `-v` - wyświetlenie istotnych zdarzeń
+3. Paramter `-vv` - wyświetlenie wszystkich zdarzeń

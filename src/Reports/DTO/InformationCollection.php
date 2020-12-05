@@ -51,4 +51,9 @@ class InformationCollection
 
         return $tmpArray;
     }
+
+    public function count(): int
+    {
+        return count($this->collection);
+    }
 }

@@ -20,9 +20,11 @@ use App\Reports\Resolvers\InformationTypeResolver;
 use App\Reports\Resolvers\UniqueDescriptionInformationTypeResolverDecorator;
 use App\Reports\Services\InformationService;
 use Exception;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class GenerateReportsCommand extends Command
@@ -43,6 +45,9 @@ class GenerateReportsCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $logger = new ConsoleLogger($output);
+        $logger->info(sprintf("Command %s started", self::$defaultName));
+
         $sourcePath = $input->getArgument(self::SOURCE_PATH_ARGUMENT_NAME);
 
         $file = new JsonFile($sourcePath);
@@ -54,63 +59,56 @@ class GenerateReportsCommand extends Command
         $resolver = new UniqueDescriptionInformationTypeResolverDecorator(new InformationTypeResolver(), $collection);
         $collectionService = new InformationService($fileDecoderService, $mapper, $collection, $resolver);
         try {
+            $logger->info('Recognition of types of messages');
             $collection = $collectionService->buildTypeCollection();
-//            $collectionReview = $collection->filterByType(AbstractInformationTypesDictionary::INFORMATION_TYPE_REVIEW);
-//            $collectionAccident = $collection->filterByType(AbstractInformationTypesDictionary::INFORMATION_TYPE_ACCIDENT);
-//            $collectionUnprocessed = $collection->filterByType(AbstractInformationTypesDictionary::INFORMATION_TYPE_UNPROCESSED);
 
-            //TODO do zmiany na logowanie
-//            echo 'Przetworzone wiadomości: ';
-//            echo count($collection->getCollection());
-//            echo PHP_EOL;
-//
-//            echo 'Liczba utworzonych przeglądów: ';
-//            echo count($collectionReview);
-//            echo PHP_EOL;
-//
-//            echo 'Liczba utworzonych awarii: ';
-//            echo count($collectionAccident);
-//            echo PHP_EOL;
-//
-//            foreach ($collectionUnprocessed as $unprocessed) {
-//                echo sprintf('Nie przetworzono zadania: %d. Powód: %s', $unprocessed->getNumber(), $unprocessed->getReason());
-//                echo PHP_EOL;
-//            }
+            $logger->info('Create collections by message types');
+            $collectionReview = $collection->createInstanceByType(AbstractInformationTypesDictionary::INFORMATION_TYPE_REVIEW);
+            $collectionAccident = $collection->createInstanceByType(AbstractInformationTypesDictionary::INFORMATION_TYPE_ACCIDENT);
+            $collectionUnprocessed = $collection->createInstanceByType(AbstractInformationTypesDictionary::INFORMATION_TYPE_UNPROCESSED);
 
-            //TODO logowanie istotnych momentów
+            $this->saveCollectionToFile('./data/unprocessed.json', $collectionUnprocessed, $logger);
+            $this->saveCollectionToFile('./data/review.json', $collectionReview, $logger);
+            $this->saveCollectionToFile('./data/accident.json', $collectionAccident, $logger);
 
         } catch (FileException | DecoderException | Exception $e) {
-            echo 'error: ' . $e->getMessage();
+            $logger->error($e->getMessage());
 
             return Command::FAILURE;
         }
 
-        try {
-            $this->saveCollectionToFile('./resources/unprocessed.json', $collection, AbstractInformationTypesDictionary::INFORMATION_TYPE_UNPROCESSED);
-            $this->saveCollectionToFile('./resources/review.json', $collection, AbstractInformationTypesDictionary::INFORMATION_TYPE_REVIEW);
-            $this->saveCollectionToFile('./resources/accident.json', $collection, AbstractInformationTypesDictionary::INFORMATION_TYPE_ACCIDENT);
-        } catch (EncoderException | FileException $e) {
-            echo 'error: ' . $e->getMessage();
+        $logger->info(sprintf("Command %s executed successfully.", self::$defaultName));
 
-            return Command::FAILURE;
+        $output->writeln(
+            [
+                '------',
+                sprintf('Parsed messages: %d', $collection->count()),
+                sprintf('Created reviews: %d', $collectionReview->count()),
+                sprintf('Created accidents: %d', $collectionAccident->count()),
+                sprintf('Created unprocessed: %d', $collectionUnprocessed->count()),
+            ]
+        );
+        foreach ($collectionUnprocessed as $unprocessed) {
+            $output->writeln(sprintf('Unprocessed: %d. Reason: %s', $unprocessed->getNumber(), $unprocessed->getReason()));
         }
-
 
         return Command::SUCCESS;
     }
 
     /**
      * @param string $filePath
-     * @param InformationCollection $informationCollection
-     * @param string $collectionType
+     * @param InformationCollection $collection
+     * @param LoggerInterface $logger
      * @throws EncoderException
      * @throws FileException
      */
-    private function saveCollectionToFile(string $filePath, InformationCollection $informationCollection, string $collectionType): void
+    private function saveCollectionToFile(string $filePath, InformationCollection $collection, LoggerInterface $logger): void
     {
         $file = new JsonFile($filePath);
         $writer = new FileWriter($file, new FileSystemAdapter());
-        $filteredCollection = $informationCollection->createInstanceByType($collectionType);
-        (new FileWriterEncoderService($file, $writer))->run($filteredCollection->toArray());
+
+        $logger->notice(sprintf('Save collection to file: %s', $file->getFilePath()));
+
+        (new FileWriterEncoderService($file, $writer))->run($collection->toArray());
     }
 }
